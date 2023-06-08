@@ -4,9 +4,9 @@ import AppNavigator from './AppNavigator';
 
 const App = () => {
   return (
-    <NavigationContainer>
-      <AppNavigator />
-    </NavigationContainer>
+    // <NavigationContainer>
+    //   <AppNavigator />
+    // </NavigationContainer>
   );
 };
 
