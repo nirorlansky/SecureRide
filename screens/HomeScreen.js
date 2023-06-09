@@ -11,11 +11,15 @@ const HomeScreen = () => {
     const goToRegistrations = () => {
       navigation.navigate('Registrations');
     };
+    const goToMap = () => {
+      navigation.navigate('Map');
+    };
     return (
       <View>
         <Text>Welcome to Secure Ride App!</Text>
         <Button title="View Vehicle Details" onPress={goToVehicleDetails} />
         <Button title="Registrations" onPress={goToRegistrations} />
+        <Button title="Map" onPress={goToMap} />
       </View>
     );
   };
