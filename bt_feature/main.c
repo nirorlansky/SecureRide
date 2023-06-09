@@ -4,6 +4,8 @@
 #include <ws2bth.h>
 #include <stdint.h>
 
+#define IDO_BT_ADD "7c:a4:49:5f:a8:a1"
+
 void initWinsock() {
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -36,31 +38,34 @@ void convertBluetoothAddress(char* address, uint64_t* result) {
 void establishConnection(SOCKET bluetoothSocket) {
     SOCKADDR_BTH serverAddress = {0};
     serverAddress.addressFamily = AF_BTH;
-    convertBluetoothAddress("7c:a4:49:5f:a8:a1", &serverAddress.btAddr);
+    convertBluetoothAddress(IDO_BT_ADD, &serverAddress.btAddr);
     serverAddress.serviceClassId = RFCOMM_PROTOCOL_UUID;
-    int connect_ret = connect(bluetoothSocket, (SOCKADDR*)&serverAddress, sizeof serverAddress);
-    if (connect_ret == 0) {
-        printf("Connection established.\n");
-    } else {
-        printf("Failed to connect to the mobile phone!");
-        closesocket(bluetoothSocket);
-        WSACleanup();
-        exit(1);
-    }
+    int connect_ret;
+    do {
+        connect_ret = connect(bluetoothSocket, (SOCKADDR*)&serverAddress, sizeof serverAddress);
+    } while (connect_ret != 0);
+    printf("Connection established.\n");
 }
 
+void sendMessages(SOCKET bluetoothSocket) {
+    char byte = 127;
+    int send_ret;
+    do {
+        send_ret = send(bluetoothSocket, &byte, 1, 0);
+    } while(send_ret != SOCKET_ERROR);
+}
 
 int main() {
     initWinsock();
-    SOCKET bluetoothSocket = createSocket();
-    establishConnection(bluetoothSocket);
-    int data = 0;
-    int recv_ret;
-    do {
-        recv_ret = recv(bluetoothSocket, (char*)&data, sizeof data, 0);
-        printf("%d\n", data);
-    } while(recv_ret != SOCKET_ERROR);
-    closesocket(bluetoothSocket);
+    int i = 0;
+    while (i < 2) {
+        SOCKET bluetoothSocket = createSocket();
+        establishConnection(bluetoothSocket);
+        sendMessages(bluetoothSocket);
+        closesocket(bluetoothSocket);
+        printf("Disconnected.\n");
+        ++i;
+    }
     WSACleanup();
     return 0;
 }
